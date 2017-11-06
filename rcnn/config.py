@@ -160,6 +160,18 @@ dataset.Cityscape.ANCHOR_RATIOS = (0.5, 1, 2)
 dataset.Cityscape.NUM_ANCHORS = len(dataset.Cityscape.ANCHOR_SCALES) * len(dataset.Cityscape.ANCHOR_RATIOS)
 dataset.Cityscape.CLASS_ID = [0, 24, 25, 26, 27, 28, 31, 32, 33]
 
+dataset.Bottles = edict()
+dataset.Bottles.image_set = 'train'
+dataset.Bottles.test_image_set = 'val'
+dataset.Bottles.root_path = 'data'
+dataset.Bottles.dataset_path = 'data/bottles'
+dataset.Bottles.NUM_CLASSES = 2
+dataset.Bottles.SCALES = [(120, 160)]
+dataset.Bottles.ANCHOR_SCALES = (8,)
+dataset.Bottles.ANCHOR_RATIOS = (0.5, 1, 2)
+dataset.Bottles.NUM_ANCHORS = len(dataset.Cityscape.ANCHOR_SCALES) * len(dataset.Cityscape.ANCHOR_RATIOS)
+dataset.Bottles.CLASS_ID = [0, 1]
+
 def generate_config(_network, _dataset):
     for k, v in network[_network].items():
         if k in config:

@@ -3,8 +3,9 @@ export PYTHONUNBUFFERED=1
 export MXNET_ENABLE_GPU_P2P=0
 export PYTHONPATH=incubator-mxnet/python/
 
-TRAIN_DIR=model/res50-fpn/cityscape/alternate/
-DATASET=Cityscape
+TRAIN_DIR=model/res50-fpn/bottles/alternate/
+DATASET=Bottles
+DATASET_PATH=data/bottles
 SET=train
 TEST_SET=val
 mkdir -p ${TRAIN_DIR}
@@ -18,5 +19,6 @@ python train_alternate_mask_fpn.py \
     --pretrained model/resnet-50 \
     --prefix ${TRAIN_DIR} \
     --pretrained_epoch 0 \
-    --gpu 0,1,2,3 |& tee -a ${TRAIN_DIR}/train.log
+    --dataset_path ${DATASET_PATH} \
+    --gpu 0 |& tee -a ${TRAIN_DIR}/train.log
 
