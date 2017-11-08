@@ -105,7 +105,7 @@ default = edict()
 default.network = 'resnet_fpn'
 default.pretrained = 'model/resnet-50'
 default.pretrained_epoch = 0
-default.base_lr = 0.004
+default.base_lr = 0.001
 # default dataset
 default.dataset = 'Cityscape'
 default.image_set = 'train'
