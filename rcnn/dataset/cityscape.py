@@ -196,13 +196,18 @@ class Cityscape(IMDB):
             filename = image_path.split("/")[-1]
             filename = filename.replace('.png', '')
 
-            result_path = 'data/cityscape/results/pred/'
+            result_path = 'data/%s/results/pred/' % self.__class__.__name__.lower()
 
             print 'writing results for: ', filename
             result_txt = os.path.join(result_path, filename)
             result_txt = result_txt + '.txt'
             count = 0
-            f = open(result_txt, 'w')
+            try:
+                f = open(result_txt, 'w')
+            except IOError:
+                os.makedirs(result_path)
+                f = open(result_txt, 'w')
+
 
             for j, labelID in enumerate(self.class_id):
                 if labelID == 0:

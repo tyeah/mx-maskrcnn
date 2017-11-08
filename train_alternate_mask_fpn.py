@@ -69,8 +69,37 @@ def alternate_train(args, ctx, pretrained, epoch,
     combine_model(model_path+'/rpn2', rpn_epoch, model_path+'/rcnn2', rcnn_epoch, model_path+'/final', 0)
 
 
+def alternate_combine(args, ctx, pretrained, epoch,
+                    rpn_epoch, rpn_lr, rpn_lr_step,
+                    rcnn_epoch, rcnn_lr, rcnn_lr_step):
+    # set up logger
+    logging.basicConfig()
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    # basic config
+    begin_epoch = 0
+    config.TRAIN.BG_THRESH_LO = 0.0
+
+    # model path
+    model_path = args.prefix
+
+    try:
+        logger.info('########## COMBINE RPN1 WITH RCNN1')
+        logger.info('rpn_epoch %d, rcnn_epoch %d' % (rpn_epoch, rcnn_epoch))
+        combine_model(model_path+'/rpn1', rpn_epoch, model_path+'/rcnn1', rcnn_epoch, model_path+'/pre', 0)
+
+        logger.info('########## COMBINE RPN2 WITH RCNN1')
+        combine_model(model_path+'/rpn2', rpn_epoch, model_path+'/rcnn1', rcnn_epoch, model_path+'/rcnn2', 0)
+
+        logger.info('########## COMBINE RPN2 WITH RCNN2')
+        combine_model(model_path+'/rpn1', rpn_epoch, model_path+'/rcnn1', rcnn_epoch, model_path+'/final', 0)
+    except:
+        print("Didn't finish training")
+
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Train Faster R-CNN Network')
+    parser.add_argument('mode', help='train/combine', type=str)
     # general
     parser.add_argument('--network', help='network name', default=default.network, type=str)
     parser.add_argument('--dataset', help='dataset name', default=default.dataset, type=str)
@@ -106,9 +135,14 @@ def main():
     args = parse_args()
     print 'Called with argument:', args
     ctx = [mx.gpu(int(i)) for i in args.gpus.split(',')]
-    alternate_train(args, ctx, args.pretrained, args.pretrained_epoch,
-                    args.rpn_epoch, args.rpn_lr, args.rpn_lr_step,
-                    args.rcnn_epoch, args.rcnn_lr, args.rcnn_lr_step)
+    if args.mode == 'train':
+        alternate_train(args, ctx, args.pretrained, args.pretrained_epoch,
+                        args.rpn_epoch, args.rpn_lr, args.rpn_lr_step,
+                        args.rcnn_epoch, args.rcnn_lr, args.rcnn_lr_step)
+    elif args.mode == 'combine':
+        alternate_combine(args, ctx, args.pretrained, args.pretrained_epoch,
+                          args.rpn_epoch, args.rpn_lr, args.rpn_lr_step,
+                          args.rcnn_epoch, args.rcnn_lr, args.rcnn_lr_step)
 
 if __name__ == '__main__':
     main()

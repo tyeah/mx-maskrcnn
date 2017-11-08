@@ -58,11 +58,10 @@ def pil_imsave(filename, im):
     '''
     io.imsave(filename, im)
 
-#def main(args):
 def main():
     #blensor_result_path = args.br_path
-    blensor_result_path = '../../Data/BlensorResult'
-    root_path = 'data/bottles'
+    blensor_result_path = '/mnt/disks/scannetdata/scannet'
+    root_path = '/mnt/disks/scannetdata/maskrcnn'
     gt_dir = "gtFine"  
     img_dir ="leftImg8bit"
     imglists = "imglists"  
@@ -77,12 +76,12 @@ def main():
         check_mkdir(d)
         for spl in splits_dict.values():
             check_mkdir(os.path.join(d, spl))
-    ids_ = os.listdir(blensor_result_path)
+    ids_ = os.listdir(blensor_result_path) # eg. scene0041_01
 
     ids, ins, outs = [], [], []
     for i in ids_:
-        subpath = os.path.join(blensor_result_path, i)
-        ins_ = glob(os.path.join(subpath, '*.pgm'))
+        inst_path = os.path.join(blensor_result_path, 'instance-filt')
+        ins_ = glob(os.path.join(inst_path, '*.pgm'))
         outs_ = glob(os.path.join(subpath, '*.npz'))
         assert len(ins_) == len(outs_)
         ins += ins_
@@ -94,24 +93,26 @@ def main():
     for spl in splits_dict.values():
         files[spl] = open("%s/%s/%s.lst" % (root_path, imglists, spl), 'w')
     for i, (idx, inp, outp) in enumerate(zip(ids, ins, outs)):
+        im_inp = read_pgm_xyz(inp)
+        im_centroids = load_seg(outp)
+        mask = get_labels(im_centroids)
+        mask = encode_classid(mask)
+        print(np.unique(mask))
+        #print(np.unique(mask))
         spl = splits_dict[np.sum((splits - (i * 1.0 / num_imgs)) <= 0)]
         # 'city' , 'sequenceNb' , 'frameNb' , 'type' , 'type2' , 'ext'
+        # 'house' , 'roomNb' , 'frameNb' , 'type' , 'type2' , 'ext'
         img_path = "%s/%s/%d/%d_000000_000000_gtFine_instanceIds.png" % (img_dir, spl, idx, idx)
         seg_path = "%s/%s/%d/%d_000000_000000_gtFine_instanceIds.png" % (gt_dir, spl, idx, idx)
         line = "%d\t%s\t%s\n" % (idx, img_path, seg_path.replace('instanceIds', 'labelTrainIds'))
         print(line)
         files[spl].write(line)
-
-        ########## dump images #################
-        im_inp = read_pgm_xyz(inp)
-        im_centroids = load_seg(outp)
-        mask = get_labels(im_centroids)
-        mask = encode_classid(mask)
-
         img_full_path = '%s/%s' % (root_path, img_path)
         seg_full_path = '%s/%s' % (root_path, seg_path)
         try:
+            #print("????:%s/%s" % (root_path, img_path))
             pil_imsave(img_full_path, im_inp)
+            #print("????:%s/%s" % (root_path, img_path))
         except IOError:
             os.makedirs(os.path.dirname(img_full_path))
             pil_imsave(img_full_path, im_inp)
@@ -120,7 +121,6 @@ def main():
         except IOError:
             os.makedirs(os.path.dirname(seg_full_path))
             pil_imsave(seg_full_path, mask)
-        ########## dump images #################
     for v in files.values():
         v.close()
 
