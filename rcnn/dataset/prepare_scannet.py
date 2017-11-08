@@ -93,12 +93,6 @@ def main():
     for spl in splits_dict.values():
         files[spl] = open("%s/%s/%s.lst" % (root_path, imglists, spl), 'w')
     for i, (idx, inp, outp) in enumerate(zip(ids, ins, outs)):
-        im_inp = read_pgm_xyz(inp)
-        im_centroids = load_seg(outp)
-        mask = get_labels(im_centroids)
-        mask = encode_classid(mask)
-        print(np.unique(mask))
-        #print(np.unique(mask))
         spl = splits_dict[np.sum((splits - (i * 1.0 / num_imgs)) <= 0)]
         # 'city' , 'sequenceNb' , 'frameNb' , 'type' , 'type2' , 'ext'
         # 'house' , 'roomNb' , 'frameNb' , 'type' , 'type2' , 'ext'
@@ -107,6 +101,12 @@ def main():
         line = "%d\t%s\t%s\n" % (idx, img_path, seg_path.replace('instanceIds', 'labelTrainIds'))
         print(line)
         files[spl].write(line)
+
+        ########## dump images #################
+        im_inp = read_pgm_xyz(inp)
+        im_centroids = load_seg(outp)
+        mask = get_labels(im_centroids)
+        mask = encode_classid(mask)
         img_full_path = '%s/%s' % (root_path, img_path)
         seg_full_path = '%s/%s' % (root_path, seg_path)
         try:
@@ -121,6 +121,7 @@ def main():
         except IOError:
             os.makedirs(os.path.dirname(seg_full_path))
             pil_imsave(seg_full_path, mask)
+        ########## dump images #################
     for v in files.values():
         v.close()
 
