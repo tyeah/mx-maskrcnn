@@ -22,6 +22,8 @@ from PIL import Image
 #from matplotlib import pyplot as plt
 from skimage import io
 
+from multiprocessing import Pool
+
 
 
 def get_labels(out_s):
@@ -59,6 +61,7 @@ def pil_imsave(filename, im):
     io.imsave(filename, im)
 
 def main():
+    n_threads = 50
     #blensor_result_path = args.br_path
     blensor_result_path = '/mnt/disks/scannetdata/scannet'
     root_path = '/mnt/disks/scannetdata/maskrcnn'
@@ -78,16 +81,27 @@ def main():
             check_mkdir(os.path.join(d, spl))
     ids_ = os.listdir(blensor_result_path) # eg. scene0041_01
 
-    ids, ins, outs = [], [], []
+    ins, inst_ids, sem_ids = [], [], []
+    num_imgs = 0
+    pool = Pool(n_threads)
     for i in ids_:
-        inst_path = os.path.join(blensor_result_path, 'instance-filt')
-        ins_ = glob(os.path.join(inst_path, '*.pgm'))
-        outs_ = glob(os.path.join(subpath, '*.npz'))
-        assert len(ins_) == len(outs_)
+    #for i, data in enumerate(pool.imap(rotation_depth_map, ids_)):
+        ins_path = os.path.join(blensor_result_path, '%s/out' % i)
+        ins_ = glob(os.path.join(ins_path, '*.color.jpg'))
+        inst_ids_path = os.path.join(blensor_result_path, '%s/instance-filt' % i)
+        inst_ids_ = glob(os.path.join(inst_ids_path, '*.png'))
+        sem_ids_path = os.path.join(blensor_result_path, '%s/label-filt' % i)
+        sem_ids_ = glob(os.path.join(sem_ids_path, '*.png'))
+        #print(ins_path, inst_ids_path, sem_ids_path)
+        assert len(ins_) == len(inst_ids_) == len(sem_ids_)
         ins += ins_
-        outs += outs_
-        ids += [int(i)] * len(ins_)
-    num_imgs = len(ids)
+        inst_ids += inst_ids_
+        sem_ids += sem_ids_
+        num_imgs += len(ins_)
+        print(len(ins_))
+    #num_imgs = len(ins)
+    print(num_imgs, '-' * 80)
+    exit()
 
     files = {}
     for spl in splits_dict.values():
