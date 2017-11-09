@@ -22,6 +22,8 @@ from PIL import Image
 #from matplotlib import pyplot as plt
 from skimage import io
 
+from multiprocessing import Pool
+
 
 
 def get_labels(out_s):
@@ -47,16 +49,18 @@ def encode_classid(mask):
 
 def pil_imsave(filename, im):
     im = im.astype(np.uint32)
-    '''
-    if (im.shape) == 2:
-        result = Image.fromarray(im, 'I')#.astype(np.int32)
-    else:
-        result = Image.fromarray(im, 'RGB')#.astype(np.int32)
-    result.save('out.bmp')
-    plt.imshow(im)
-    plt.savefig(filename)
-    '''
     io.imsave(filename, im)
+
+def pil_imsave_float(filename, im):
+    result = Image.fromarray(im, 'RGB')
+    result.save(filename)
+
+def check_save(filename, img, method=pil_imsave):
+    try:
+        method(filename, img)
+    except IOError:
+        os.makedirs(os.path.dirname(img_full_path))
+        method(filename, img)
 
 #def main(args):
 def main():
@@ -96,7 +100,7 @@ def main():
     for i, (idx, inp, outp) in enumerate(zip(ids, ins, outs)):
         spl = splits_dict[np.sum((splits - (i * 1.0 / num_imgs)) <= 0)]
         # 'city' , 'sequenceNb' , 'frameNb' , 'type' , 'type2' , 'ext'
-        img_path = "%s/%s/%d/%d_000000_000000_gtFine_instanceIds.png" % (img_dir, spl, idx, idx)
+        img_path = "%s/%s/%d/%d_000000_000000_leftImg8bit.tiff" % (img_dir, spl, idx, idx)
         seg_path = "%s/%s/%d/%d_000000_000000_gtFine_instanceIds.png" % (gt_dir, spl, idx, idx)
         line = "%d\t%s\t%s\n" % (idx, img_path, seg_path.replace('instanceIds', 'labelTrainIds'))
         print(line)
@@ -110,16 +114,8 @@ def main():
 
         img_full_path = '%s/%s' % (root_path, img_path)
         seg_full_path = '%s/%s' % (root_path, seg_path)
-        try:
-            pil_imsave(img_full_path, im_inp)
-        except IOError:
-            os.makedirs(os.path.dirname(img_full_path))
-            pil_imsave(img_full_path, im_inp)
-        try:
-            pil_imsave(seg_full_path, mask)
-        except IOError:
-            os.makedirs(os.path.dirname(seg_full_path))
-            pil_imsave(seg_full_path, mask)
+        check_save(img_full_path, im_inp, io.imsave)
+        check_save(seg_full_path, mask, pil_imsave)
         ########## dump images #################
     for v in files.values():
         v.close()
