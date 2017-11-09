@@ -9,6 +9,7 @@ import cPickle
 import PIL.Image as Image
 from imdb import IMDB
 from ..processing.bbox_transform import bbox_overlaps
+from skimage import io
 
 class Cityscape(IMDB):
     def __init__(self, image_set, root_path, dataset_path):
@@ -129,7 +130,7 @@ class Cityscape(IMDB):
             print '===============================', im, '====================================='
             roi_rec = dict()
             roi_rec['image'] = os.path.join(self.data_path, imgfiles_list[im]['img_path'])
-            size = cv2.imread(roi_rec['image']).shape
+            size = io.imread(roi_rec['image']).shape
             roi_rec['height'] = size[0]
             roi_rec['width'] = size[1]
             boxes, gt_classes, ins_id, pixel, gt_overlaps = self.load_from_seg(imgfiles_list[im]['ins_seg_path'])

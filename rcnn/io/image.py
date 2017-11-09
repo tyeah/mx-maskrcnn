@@ -5,6 +5,7 @@ import os
 import random
 from ..config import config
 import mxnet as mx
+from skimage import io
 
 def get_image(roidb, scale=False):
     """
@@ -22,7 +23,7 @@ def get_image(roidb, scale=False):
     for i in range(num_images):
         roi_rec = roidb[i]
         assert os.path.exists(roi_rec['image']), '%s does not exist'.format(roi_rec['image'])
-        im = cv2.imread(roi_rec['image'])
+        im = io.imread(roi_rec['image'])
         if roidb[i]['flipped']:
             im = im[:, ::-1, :]
 
