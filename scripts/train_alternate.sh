@@ -3,7 +3,7 @@ export PYTHONUNBUFFERED=1
 export MXNET_ENABLE_GPU_P2P=0
 export PYTHONPATH=incubator-mxnet/python/
 
-TRAIN_DIR=model/res50-fpn/bottles/alternate3/
+TRAIN_DIR=model/res50-fpn/bottles/alternate10/
 DATASET=Bottles
 DATASET_PATH=data/bottles
 SET=train
@@ -13,9 +13,6 @@ mkdir -p ${TRAIN_DIR}
 # Train
 python train_alternate_mask_fpn.py \
     train \
-    --pretrained model/res50-fpn/bottles/alternate2/rpn1 \
-    --pretrained_epoch 8 \
-    --rpn_epoch 1 \
     --network resnet_fpn \
     --dataset ${DATASET} \
     --image_set ${SET} \
